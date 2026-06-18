@@ -1,53 +1,93 @@
-let startTime = 0;
-let elapsedTime = 0;
-let timerInterval;
+const quizData = [
+  {
+    type: "single",
+    question: "Which language runs in a web browser?",
+    options: ["Java", "C", "Python", "JavaScript"],
+    answer: "JavaScript"
+  },
+  {
+    type: "multi",
+    question: "Select all programming languages:",
+    options: ["HTML", "CSS", "Python", "Java"],
+    answer: ["Python", "Java"]
+  },
+  {
+    type: "blank",
+    question: "Fill in the blank: CSS stands for ______.",
+    answer: "Cascading Style Sheets"
+  }
+];
 
-const display = document.getElementById("display");
-const laps = document.getElementById("laps");
+let currentQuestion = 0;
+let score = 0;
 
-function timeToString(time) {
-  let diffInHrs = time / 3600000;
-  let hh = Math.floor(diffInHrs);
+const questionEl = document.getElementById("question");
+const optionsEl = document.getElementById("options");
+const fillBlankEl = document.getElementById("fillBlank");
+const submitBtn = document.getElementById("submit");
+const resultEl = document.getElementById("result");
 
-  let diffInMin = (diffInHrs - hh) * 60;
-  let mm = Math.floor(diffInMin);
+function loadQuestion() {
+  const q = quizData[currentQuestion];
+  questionEl.textContent = q.question;
+  optionsEl.innerHTML = "";
+  fillBlankEl.style.display = "none";
 
-  let diffInSec = (diffInMin - mm) * 60;
-  let ss = Math.floor(diffInSec);
-
-  let formattedHH = hh.toString().padStart(2, "0");
-  let formattedMM = mm.toString().padStart(2, "0");
-  let formattedSS = ss.toString().padStart(2, "0");
-
-  return `${formattedHH}:${formattedMM}:${formattedSS}`;
+  if (q.type === "single") {
+    q.options.forEach(opt => {
+      const label = document.createElement("label");
+      label.innerHTML = `<input type="radio" name="option" value="${opt}"> ${opt}`;
+      optionsEl.appendChild(label);
+    });
+  } else if (q.type === "multi") {
+    q.options.forEach(opt => {
+      const label = document.createElement("label");
+      label.innerHTML = `<input type="checkbox" name="option" value="${opt}"> ${opt}`;
+      optionsEl.appendChild(label);
+    });
+  } else if (q.type === "blank") {
+    fillBlankEl.style.display = "block";
+  }
 }
 
-function start() {
-  startTime = Date.now() - elapsedTime;
-  timerInterval = setInterval(() => {
-    elapsedTime = Date.now() - startTime;
-    display.textContent = timeToString(elapsedTime);
-  }, 1000);
+function checkAnswer() {
+  const q = quizData[currentQuestion];
+  let userAnswer;
+
+  if (q.type === "single") {
+    const selected = document.querySelector('input[name="option"]:checked');
+    if (selected) userAnswer = selected.value;
+  } else if (q.type === "multi") {
+    const selected = [...document.querySelectorAll('input[name="option"]:checked')].map(el => el.value);
+    userAnswer = selected;
+  } else if (q.type === "blank") {
+    userAnswer = fillBlankEl.value.trim();
+  }
+
+  if (q.type === "multi") {
+    if (JSON.stringify(userAnswer.sort()) === JSON.stringify(q.answer.sort())) {
+      score++;
+    }
+  } else if (userAnswer === q.answer) {
+    score++;
+  }
+
+  currentQuestion++;
+  if (currentQuestion < quizData.length) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
 }
 
-function pause() {
-  clearInterval(timerInterval);
+function showResult() {
+  questionEl.textContent = "";
+  optionsEl.innerHTML = "";
+  fillBlankEl.style.display = "none";
+  submitBtn.style.display = "none";
+  resultEl.textContent = `Your score: ${score} / ${quizData.length}`;
 }
 
-function reset() {
-  clearInterval(timerInterval);
-  display.textContent = "00:00:00";
-  elapsedTime = 0;
-  laps.innerHTML = "";
-}
+submitBtn.addEventListener("click", checkAnswer);
 
-function lap() {
-  let li = document.createElement("li");
-  li.textContent = `Lap ${laps.childElementCount + 1}: ${display.textContent}`;
-  laps.appendChild(li);
-}
-
-document.getElementById("start").addEventListener("click", start);
-document.getElementById("pause").addEventListener("click", pause);
-document.getElementById("reset").addEventListener("click", reset);
-document.getElementById("lap").addEventListener("click", lap);
+loadQuestion();

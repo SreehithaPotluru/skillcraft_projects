@@ -3,22 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Professional Stopwatch</title>
+  <title>Quiz Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Stopwatch</h1>
-    <div class="stopwatch" id="display">00:00:00</div>
-    <div class="buttons">
-      <button id="start" class="btn start">Start</button>
-      <button id="pause" class="btn pause">Pause</button>
-      <button id="reset" class="btn reset">Reset</button>
-      <button id="lap" class="btn lap">Lap</button>
+  <div class="quiz-container">
+    <h1>Quiz Game</h1>
+    <div id="quiz">
+      <div id="question" class="question"></div>
+      <div id="options" class="options"></div>
+      <input type="text" id="fillBlank" class="fill-blank" placeholder="Type your answer..." style="display:none;">
+      <button id="submit" class="btn">Submit</button>
     </div>
-    <ul class="lap-times" id="laps"></ul>
+    <div id="result" class="result"></div>
   </div>
   <script src="script.js"></script>
 </body>
 </html>
-
