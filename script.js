@@ -1,93 +1,43 @@
-const quizData = [
-  {
-    type: "single",
-    question: "Which language runs in a web browser?",
-    options: ["Java", "C", "Python", "JavaScript"],
-    answer: "JavaScript"
-  },
-  {
-    type: "multi",
-    question: "Select all programming languages:",
-    options: ["HTML", "CSS", "Python", "Java"],
-    answer: ["Python", "Java"]
-  },
-  {
-    type: "blank",
-    question: "Fill in the blank: CSS stands for ______.",
-    answer: "Cascading Style Sheets"
+function addTask() {
+  const taskInput = document.getElementById('task');
+  const dateInput = document.getElementById('taskDate');
+  const taskText = taskInput.value.trim();
+  const taskDate = dateInput.value;
+
+  if (taskText === '') {
+    alert('Please enter a task');
+    return;
   }
-];
 
-let currentQuestion = 0;
-let score = 0;
+  const li = document.createElement('li');
+  li.innerHTML = `
+    <span>${taskText} ${taskDate ? ' - ' + new Date(taskDate).toLocaleString() : ''}</span>
+    <div class="actions">
+      <button onclick="toggleComplete(this)">✔</button>
+      <button class="edit" onclick="editTask(this)">✎</button>
+      <button class="delete" onclick="deleteTask(this)">🗑</button>
+    </div>
+  `;
+  document.getElementById('taskList').appendChild(li);
 
-const questionEl = document.getElementById("question");
-const optionsEl = document.getElementById("options");
-const fillBlankEl = document.getElementById("fillBlank");
-const submitBtn = document.getElementById("submit");
-const resultEl = document.getElementById("result");
+  taskInput.value = '';
+  dateInput.value = '';
+}
 
-function loadQuestion() {
-  const q = quizData[currentQuestion];
-  questionEl.textContent = q.question;
-  optionsEl.innerHTML = "";
-  fillBlankEl.style.display = "none";
+function toggleComplete(button) {
+  const task = button.parentElement.previousElementSibling;
+  task.classList.toggle('completed');
+}
 
-  if (q.type === "single") {
-    q.options.forEach(opt => {
-      const label = document.createElement("label");
-      label.innerHTML = `<input type="radio" name="option" value="${opt}"> ${opt}`;
-      optionsEl.appendChild(label);
-    });
-  } else if (q.type === "multi") {
-    q.options.forEach(opt => {
-      const label = document.createElement("label");
-      label.innerHTML = `<input type="checkbox" name="option" value="${opt}"> ${opt}`;
-      optionsEl.appendChild(label);
-    });
-  } else if (q.type === "blank") {
-    fillBlankEl.style.display = "block";
+function editTask(button) {
+  const task = button.parentElement.previousElementSibling;
+  const newTask = prompt('Edit task:', task.textContent);
+  if (newTask !== null && newTask.trim() !== '') {
+    task.textContent = newTask;
   }
 }
 
-function checkAnswer() {
-  const q = quizData[currentQuestion];
-  let userAnswer;
-
-  if (q.type === "single") {
-    const selected = document.querySelector('input[name="option"]:checked');
-    if (selected) userAnswer = selected.value;
-  } else if (q.type === "multi") {
-    const selected = [...document.querySelectorAll('input[name="option"]:checked')].map(el => el.value);
-    userAnswer = selected;
-  } else if (q.type === "blank") {
-    userAnswer = fillBlankEl.value.trim();
-  }
-
-  if (q.type === "multi") {
-    if (JSON.stringify(userAnswer.sort()) === JSON.stringify(q.answer.sort())) {
-      score++;
-    }
-  } else if (userAnswer === q.answer) {
-    score++;
-  }
-
-  currentQuestion++;
-  if (currentQuestion < quizData.length) {
-    loadQuestion();
-  } else {
-    showResult();
-  }
+function deleteTask(button) {
+  const li = button.closest('li');
+  li.remove();
 }
-
-function showResult() {
-  questionEl.textContent = "";
-  optionsEl.innerHTML = "";
-  fillBlankEl.style.display = "none";
-  submitBtn.style.display = "none";
-  resultEl.textContent = `Your score: ${score} / ${quizData.length}`;
-}
-
-submitBtn.addEventListener("click", checkAnswer);
-
-loadQuestion();
